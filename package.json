@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/strawhattom/secure-web-dev-workshop2/issues"
   },
-  "homepage": "https://github.com/strawhattom/secure-web-dev-workshop2#readme"
+  "homepage": "https://github.com/strawhattom/secure-web-dev-workshop2#readme",
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "mongoose": "^6.6.1"
+  }
 }
