@@ -1,38 +1,9 @@
+const filmingLocations = require('./lieux-de-tournage-a-paris.json');    // load locations
 require('dotenv').config();                                             // load dotenv packages
-const filmingLocations = require('./lieux-de-tournage-a-paris.json')    // load locations
 const mongoose = require('mongoose');                                   // load mongoose
-const { Schema } = mongoose;
 
-// Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {  
-    console.log("[+] Connection is successfull");
-    }).catch((e) => {
-        console.log("[-] No connection ");
-        console.error(e);
-    });    
 
-// Creation location schema
-const locationSchema = new Schema({
-    filmType:  String,
-    filmProducerName: String,
-    endDate:   Date,
-    filmName:  String,
-    district: String,
-    geolocation : {
-        coordinates: [Number],
-        type: String
-    },
-    sourceLocationId : String,
-    filmDirectorName : String,
-    address : String,
-    startDate : Date,
-    year : String
-});
-
-const Location = mongoose.model('Location', locationSchema);
-
-const importLocations = (locations) => {
+const getLocations = (locations) => {
     let _loc = []
     locations.forEach(element => {
 
@@ -42,7 +13,10 @@ const importLocations = (locations) => {
             endDate:   new Date(element.fields.date_fin),
             filmName:  element.fields.nom_tournage,
             district: element.fields.ardt_lieu,
-            geolocation : element.fields.geo_shape,
+            geolocation : {
+                coordinates:element.fields.geo_shape.coordinates,
+                type:element.fields.geo_shape.type
+            },
             sourceLocationId : element.fields.id_lieu,
             filmDirectorName : element.fields.nom_realisateur,
             address : element.fields.adresse_lieu,
@@ -50,13 +24,29 @@ const importLocations = (locations) => {
             year : element.fields.annee_tournage
         });
     })
-
     return _loc;
 };
 
-Location.insertMany(importLocations(filmingLocations), (err) => {
-    // something occured
+// Connection
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {  
+        console.log("[+] Connection is successfull");
+    })
+    .catch((e) => {
+        console.log("[-] No connection ");
+        console.error(e);
+});
+
+const Location = mongoose.model("Location", require("./schemas/locationSchema"));
+
+const locations = getLocations(filmingLocations);
+
+Location.insertMany([...locations]).then(() => {
+    conosle.log("[*] Data inserted, total of " + locations.length);
+}).catch((err) => {
     console.error(err);
-})
+});
+
+
 
 mongoose.connection.close();
