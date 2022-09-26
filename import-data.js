@@ -24,20 +24,33 @@ async function locationById(id) {
 }
 
 async function locationByName(filmName){
-    Location.find().where('filmName').equals(filmName);
+    Location.find().where('filmName').equals(filmName).then(response => {
+        if (response) {
+            for (const location of response) {
+                console.log(location);
+            }
+        }
+    });
 }
 
 async function deleteById(id) {
-    Location.findOne({id:id});
+    await Location.findOneAndDelete({id}, function (err, docs) {
+        if (err){
+            console.log(err)
+        }
+        else{
+            console.log("Deleted location : ", docs);
+        }
+    });
 }
 
 async function addLocation(location) {
-    Location.create(location);
+    await Location.create(location);
 }
 
 /* TO DO */
-async function updateLocation(id, newLocation){
-    return;
+async function updateLocation(id, newProperty){
+    await Location.findOneAndUpdate({id}, newProperty);
 }
 
 const getLocations = (locations) => {
@@ -67,8 +80,8 @@ const getLocations = (locations) => {
     return _loc;
 };
 
+/*
 const locations = getLocations(filmingLocations);
-
 
 Location.insertMany(
     locations
@@ -80,3 +93,8 @@ Location.insertMany(
     console.log(e);
     mongoose.connection.close();
 });
+*/
+
+// locationById(0);
+locationByName("TOUT S'EST BIEN PASSE");
+mongoose.connection.close();
