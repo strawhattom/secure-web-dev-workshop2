@@ -2,21 +2,21 @@ const { Schema } = require('mongoose');
 
 // Creation location schema
 const locationSchema = new Schema({
-    filmType:  {String, required: false } ,
-    filmProducerName: {String, required: false},
-    endDate:   {Date, required: false},
-    filmName:  {String, required: false},
-    district: {String, required: false},
+    id: Number,
+    filmType:  String ,
+    filmProducerName: String,
+    endDate:   Date,
+    filmName:  String,
+    district: String,
     geolocation : {
         coordinates: [Number],
-        type: String,
-        required: false
+        type: String
     },
-    sourceLocationId : {String, required: false},
-    filmDirectorName : {String, required: false},
-    address : {String, required: false},
-    startDate : {Date, required: false},
-    year : {String, required: false}
+    sourceLocationId : String,
+    filmDirectorName : String,
+    address : String,
+    startDate : Date,
+    year : String
     },
     { typeKey: '$type' }
 );

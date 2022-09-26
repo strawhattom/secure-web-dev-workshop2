@@ -2,12 +2,51 @@ const filmingLocations = require('./lieux-de-tournage-a-paris.json');    // load
 require('dotenv').config();                                             // load dotenv packages
 const mongoose = require('mongoose');                                   // load mongoose
 
+// Connection
+try {
+    mongoose.connect(process.env.MONGO_ROOT_URI);
+    
+    console.log("[+] Connection is successfull");
+ 
+} catch (e) {
+    console.log("[-] No connection ");
+    console.error(e);
+}
+
+const Location = mongoose.model("Location", require("./schemas/locationSchema"));
+
+// Queries
+
+async function locationById(id) {
+    Location.findOne({id:id}).then(response => {
+        console.log(response);
+    });
+}
+
+async function locationByName(filmName){
+    Location.find().where('filmName').equals(filmName);
+}
+
+async function deleteById(id) {
+    Location.findOne({id:id});
+}
+
+async function addLocation(location) {
+    Location.create(location);
+}
+
+/* TO DO */
+async function updateLocation(id, newLocation){
+    return;
+}
 
 const getLocations = (locations) => {
     let _loc = []
+    let count = 0;
     locations.forEach(element => {
 
         _loc.push({
+            id:count,
             filmType:  element.fields.type_tournage,
             filmProducerName: element.fields.nom_producteur,
             endDate:   new Date(element.fields.date_fin),
@@ -23,52 +62,21 @@ const getLocations = (locations) => {
             startDate : new Date(element.fields.date_debut),
             year : element.fields.annee_tournage
         });
+        count++;
     })
     return _loc;
 };
 
-// Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {  
-        console.log("[+] Connection is successfull");
-    })
-    .catch((e) => {
-        console.log("[-] No connection ");
-        console.error(e);
-});
-
-const Location = mongoose.model("Location", require("./schemas/locationSchema"));
-
 const locations = getLocations(filmingLocations);
 
-Location.insertMany([...locations]).then(() => {
+
+Location.insertMany(
+    locations
+).then(() => {
     console.log("[*] Data inserted, total of " + locations.length);
-}).catch((err) => {
-    console.error(err);
+    console.log("[*] Closing connection");
+    mongoose.connection.close();
+}).catch((e) => {
+    console.log(e);
+    mongoose.connection.close();
 });
-
-
-// Queries
-
-async function locationById(id) {
-    return await Location.findOne({id:id});
-}
-
-async function locationByName(filmName){
-    return await Location.find().where('filmName').equals(filmName);
-}
-
-async function deleteById(id) {
-    return await Location.findOne({id:id});
-}
-
-async function addLocation(location) {
-    return await Location.create(location);
-}
-
-/* TO DO */
-async function updateLocation(id, newLocation){
-    return;
-}
-
-mongoose.connection.close();
