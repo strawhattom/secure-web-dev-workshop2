@@ -42,11 +42,33 @@ const Location = mongoose.model("Location", require("./schemas/locationSchema"))
 const locations = getLocations(filmingLocations);
 
 Location.insertMany([...locations]).then(() => {
-    conosle.log("[*] Data inserted, total of " + locations.length);
+    console.log("[*] Data inserted, total of " + locations.length);
 }).catch((err) => {
     console.error(err);
 });
 
 
+// Queries
+
+async function locationById(id) {
+    return await Location.findOne({id:id});
+}
+
+async function locationByName(filmName){
+    return await Location.find().where('filmName').equals(filmName);
+}
+
+async function deleteById(id) {
+    return await Location.findOne({id:id});
+}
+
+async function addLocation(location) {
+    return await Location.create(location);
+}
+
+/* TO DO */
+async function updateLocation(id, newLocation){
+    return;
+}
 
 mongoose.connection.close();
