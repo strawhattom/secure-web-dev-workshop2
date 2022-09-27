@@ -2,7 +2,6 @@ const { Schema } = require('mongoose');
 
 // Creation location schema
 const locationSchema = new Schema({
-    id: Number,
     filmType:  String ,
     filmProducerName: String,
     endDate:   Date,

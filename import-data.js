@@ -2,39 +2,32 @@ const filmingLocations = require('./lieux-de-tournage-a-paris.json');    // load
 require('dotenv').config();                                             // load dotenv packages
 const mongoose = require('mongoose');                                   // load mongoose
 
-// Connection
-try {
-    mongoose.connect(process.env.MONGO_ROOT_URI);
-    
-    console.log("[+] Connection is successfull");
- 
-} catch (e) {
-    console.log("[-] No connection ");
-    console.error(e);
-}
+// Queries
 
 const Location = mongoose.model("Location", require("./schemas/locationSchema"));
 
-// Queries
-
 async function locationById(id) {
-    Location.findOne({id:id}).then(response => {
+    try {
+        const response = await Location.findOne({_id:id});
         console.log(response);
-    });
+    } catch (err) {
+        console.log("Something occured while retrieving a location");
+        console.log(err);
+    }
 }
 
 async function locationByName(filmName){
-    Location.find().where('filmName').equals(filmName).then(response => {
-        if (response) {
-            for (const location of response) {
-                console.log(location);
-            }
-        }
-    });
+    try {
+        const response = await Location.find().where('filmName').equals(filmName);
+        console.log(response);
+    } catch (err) {
+        console.log("Something occured while retrieving locations");
+        console.log(err);
+    }
 }
 
 async function deleteById(id) {
-    await Location.findOneAndDelete({id}, function (err, docs) {
+    await Location.findOneAndDelete({_id:id}, function (err, docs) {
         if (err){
             console.log(err)
         }
@@ -45,21 +38,31 @@ async function deleteById(id) {
 }
 
 async function addLocation(location) {
-    await Location.create(location);
+    try {
+        await Location.create(location);
+        console.log("Location added");
+    } catch (err) {
+        console.log("An error occured");
+    }
+    
 }
 
-/* TO DO */
 async function updateLocation(id, newProperty){
-    await Location.findOneAndUpdate({id}, newProperty);
+    try {
+        await Location.findOneAndUpdate({_id:id}, newProperty);
+        console.log("Location updated ! ");
+
+    } catch (err) {
+        console.log("An error occured while updating a location...");
+
+    }
 }
 
 const getLocations = (locations) => {
     let _loc = []
-    let count = 0;
     locations.forEach(element => {
 
         _loc.push({
-            id:count,
             filmType:  element.fields.type_tournage,
             filmProducerName: element.fields.nom_producteur,
             endDate:   new Date(element.fields.date_fin),
@@ -75,26 +78,49 @@ const getLocations = (locations) => {
             startDate : new Date(element.fields.date_debut),
             year : element.fields.annee_tournage
         });
-        count++;
     })
     return _loc;
 };
 
-/*
-const locations = getLocations(filmingLocations);
+// Connection
+mongoose.connect(process.env.MONGO_ROOT_URI).then((success) => {
 
-Location.insertMany(
-    locations
-).then(() => {
-    console.log("[*] Data inserted, total of " + locations.length);
-    console.log("[*] Closing connection");
+    console.log("[+] Connection is successfull");
+
+    /* IMPORT DATA
+    const locations = getLocations(filmingLocations);
+    Location.insertMany(
+        locations
+    ).then(() => {
+        console.log("[*] Data inserted, total of " + locations.length);
+        console.log("[*] Closing connection");
+        mongoose.connection.close();
+    */
+
+    // locationById("63331783a53f0b578f7e6413");
+    locationByName("TOUT S'EST BIEN PASSE");
+    // addLocation({
+    //     filmType:  "NOUVEAU FILM",
+    //     filmProducerName: "NOUVEAU PRODUCTEUR",
+    //     endDate:   "2022-02-02",
+    //     filmName:  "NOM",
+    //     district: "DISTRICT",
+    //     geolocation : {
+    //         coordinates:[3,3],
+    //         type:"TYPE"
+    //     },
+    //     sourceLocationId : "LOCATIONID",
+    //     filmDirectorName : "DIRECTOR",
+    //     address : "ADDRESS",
+    //     startDate : "2022-02-01",
+    //     year : "2022"
+    // });
+    // updateLocation({_id:"6333222cae5c88a1eb7430e4"}, {filmName : "NOUVEAU NOM"});
     mongoose.connection.close();
-}).catch((e) => {
-    console.log(e);
-    mongoose.connection.close();
+
+}).catch((err) => {
+
+    console.log("[-] No connection ");
+    console.error(err);
+
 });
-*/
-
-// locationById(0);
-locationByName("TOUT S'EST BIEN PASSE");
-mongoose.connection.close();
